@@ -22,7 +22,7 @@ public class TweetHandler {
 
     public void printAuthors(Hashtag hashtag) {
         Source<Author, NotUsed> authors = tweets.filter(t -> t.hashtags.contains(hashtag)).map(t -> t.author);
-        Sink<Author, CompletionStage<Done>> printSink = Sink.foreach(a -> System.out.println(a.handle));
+        Sink<Author, CompletionStage<Done>> printSink = Sink.foreach(a -> System.out.println(a.name));
         authors.runWith(printSink, system);
     }
 

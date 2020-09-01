@@ -9,8 +9,8 @@ import akka.actor.typed.javadsl.Receive;
 public class ValueHandler extends AbstractBehavior<Commend> {
     private String value = "hello world!";
 
-    public static Behavior<Commend> create(){
-        return Behaviors.setup(contex -> new ValueHandler(contex));
+    public static Behavior<Commend> create() {
+        return Behaviors.setup(ValueHandler::new);
     }
 
     private ValueHandler(ActorContext<Commend> context) {
@@ -21,18 +21,18 @@ public class ValueHandler extends AbstractBehavior<Commend> {
     public Receive<Commend> createReceive() {
         return newReceiveBuilder()
                 .onMessageEquals(SimpleCommend.PRINT, this::onPrintMsg)
-                .onMessage(ChangeMsg.class,this::onChangeMsg)
+                .onMessage(ChangeMsg.class, this::onChangeMsg)
                 .build();
     }
 
     private Behavior<Commend> onChangeMsg(ChangeMsg message) {
         value = message.body;
         message.sender.tell(SimpleCommend.DONE);
-        return this;
+        return Behaviors.same();
     }
 
-    private Behavior<Commend> onPrintMsg(){
+    private Behavior<Commend> onPrintMsg() {
         System.out.println(value);
-        return this; // In this case we don’t need to update any state, so we return this, which means the next behavior is “the same as the current one”.
+        return Behaviors.same();
     }
 }

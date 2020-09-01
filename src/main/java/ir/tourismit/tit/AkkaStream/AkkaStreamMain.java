@@ -8,7 +8,6 @@ import akka.stream.javadsl.Source;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
 
 public class AkkaStreamMain {
 
@@ -16,21 +15,21 @@ public class AkkaStreamMain {
     static final Hashtag AKKA = new Hashtag("#akka");
 
     public static void main(String[] args) {
-        TweetHandler tweetHandler = new TweetHandler(tweets(), system);
+        TweetHandler tweetHandler = new TweetHandler(sampleTweets(), system);
         System.out.println("First, it prints the authors of the tweets that have #akka and then prints the number of all tweets.");
         tweetHandler.printAuthors(AKKA); //This function is asynchronous
         CompletionStage<Integer> sum = tweetHandler.numberOfTweets();//This function is asynchronous
         sum.thenRun(() -> {
             try {
-                System.out.println("\n" + sum.toCompletableFuture().get());
-            } catch (InterruptedException | ExecutionException e) {
+                System.out.println(sum.toCompletableFuture().get());
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             system.terminate();
         });
     }
 
-    private static Source<Tweet, NotUsed> tweets() {
+    private static Source<Tweet, NotUsed> sampleTweets() {
         List<Tweet> list = new ArrayList<>();
         for (int i = 0; i < 20; i++) {
             Tweet tweet;
