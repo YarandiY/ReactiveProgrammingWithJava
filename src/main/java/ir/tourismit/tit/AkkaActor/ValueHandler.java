@@ -1,37 +1,34 @@
 package ir.tourismit.tit.AkkaActor;
 
 import akka.actor.typed.Behavior;
-import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
-import akka.actor.typed.javadsl.Receive;
 
-public class ValueHandler extends AbstractBehavior<Commend> {
-    private String value = "hello world!";
+public class ValueHandler {
+    private final ActorContext<Commend> context;
 
-    public static Behavior<Commend> create() {
-        return Behaviors.setup(ValueHandler::new);
+    private ValueHandler(ActorContext<Commend> context){
+        this.context = context;
     }
 
-    private ValueHandler(ActorContext<Commend> context) {
-        super(context);
+    public static Behavior<Commend> create(){
+        return Behaviors.setup(
+                ctx -> new ValueHandler(ctx).changeState("default value"));
     }
 
-    @Override
-    public Receive<Commend> createReceive() {
-        return newReceiveBuilder()
-                .onMessageEquals(SimpleCommend.PRINT, this::onPrintMsg)
+    private Behavior<Commend> changeState(String value) {
+        return Behaviors.receive(Commend.class)
+                .onMessageEquals(SimpleCommend.PRINT, () -> onPrintMsg(value))
                 .onMessage(ChangeMsg.class, this::onChangeMsg)
                 .build();
     }
 
     private Behavior<Commend> onChangeMsg(ChangeMsg message) {
-        value = message.body;
         message.sender.tell(SimpleCommend.DONE);
-        return Behaviors.same();
+        return changeState(message.body);
     }
 
-    private Behavior<Commend> onPrintMsg() {
+    private Behavior<Commend> onPrintMsg(String value) {
         System.out.println(value);
         return Behaviors.same();
     }
